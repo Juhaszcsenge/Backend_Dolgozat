@@ -3,15 +3,21 @@ import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { DataSource } from 'typeorm';
 import { Character } from './entities/character.entity';
+import { Player } from '../player/entities/player.entity';
 
 @Injectable()
 export class CharacterService {
   constructor(private dataSource: DataSource) {}
   async create(createCharacterDto: CreateCharacterDto) {
     const characterRepo = this.dataSource.getRepository(Character);
+    const player = this.dataSource.getRepository(Player);
+    const id = await player.findOne({
+      where: { id: createCharacterDto.userId },
+    });
     const newCharacter = new Character();
     newCharacter.name = createCharacterDto.name;
     newCharacter.experience = createCharacterDto.experience;
+    newCharacter.player = id;
     await characterRepo.save(newCharacter);
     // return 'This action adds a new character';
   }
